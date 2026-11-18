@@ -1,6 +1,6 @@
 package com.eightubah.mod.feat;
 
-import android.app.Application;
+import android.content.Context;
 
 import com.eightubah.mod.XEntry;
 
@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import de.robv.android.xposed.AndroidAppHelper;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
@@ -49,12 +48,17 @@ public final class Gate {
         if (gkId == -1) {
             gkId = 0;
             try {
-                Application app = AndroidAppHelper.currentApplication();
-                if (app != null) {
-                    gkId = app.getResources().getIdentifier(
-                            "gatekeeper_app_outdated", "string", app.getPackageName());
+                // android.app.ActivityThread.currentApplication() — the app Context,
+                // available anywhere without the Xposed AndroidAppHelper dependency.
+                Object app = Class.forName("android.app.ActivityThread")
+                        .getMethod("currentApplication").invoke(null);
+                if (app instanceof Context) {
+                    Context c = (Context) app;
+                    gkId = c.getResources().getIdentifier(
+                            "gatekeeper_app_outdated", "string", c.getPackageName());
                 }
-            } catch (Throwable t) { /* retry next call */ if (gkId == 0) gkId = -1; }
+                if (gkId == 0) gkId = -1;   // not ready yet; try again next call
+            } catch (Throwable t) { gkId = -1; }
         }
         return gkId;
     }

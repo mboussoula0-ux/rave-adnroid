@@ -82,7 +82,8 @@ public final class AudioHooks {
         int ch = Math.max(1, ar.getChannelCount()); double sr = ar.getSampleRate();
         int frames = (bytes / 2) / ch; if (frames <= 0) return;
         if (diagN < 24) { diagN++; com.eightubah.mod.Diag.log("mic(bb) sr=%d ch=%d bytes=%d frames=%d fx=%b stereo=%b eq=%b micOn=%b echo=%.2f rev=%d",
-                (int) sr, ch, bytes, frames, Dsp.fxOn(), Stereo.isOn(), Dsp.gEqOn, Dsp.gMicOn, Dsp.gMicEcho, Dsp.gRevMic); }
+                (int) sr, ch, bytes, frames, Dsp.fxOn(), Stereo.isOn(), Dsp.gEqOn, Dsp.gMicOn, Dsp.gMicEcho, Dsp.gRevMic);
+            if (diagN == 1) com.eightubah.mod.Diag.toast("mic sr=" + (int) sr + " ch=" + ch + " frames=" + frames); }
         ByteBuffer d = bb.duplicate(); d.order(ByteOrder.LITTLE_ENDIAN); d.clear(); d.limit(bytes);
         ShortBuffer sb = d.asShortBuffer();
         float[] tmp = tl(frames);

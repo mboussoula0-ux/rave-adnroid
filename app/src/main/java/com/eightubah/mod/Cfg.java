@@ -34,28 +34,28 @@ public final class Cfg {
 
     // ---- typed accessors (null-safe before init) ----
     public static String s(String k, String def) { SharedPreferences x = p(); return x == null ? def : x.getString(k, def); }
-    public static void s(String k, String v) { SharedPreferences x = p(); if (x == null) return; if (v == null) x.edit().remove(k).apply(); else x.edit().putString(k, v).apply(); }
+    public static void setS(String k, String v) { SharedPreferences x = p(); if (x == null) return; if (v == null) x.edit().remove(k).apply(); else x.edit().putString(k, v).apply(); }
 
     public static int i(String k, int def) { SharedPreferences x = p(); return x == null ? def : x.getInt(k, def); }
-    public static void i(String k, int v) { SharedPreferences x = p(); if (x != null) x.edit().putInt(k, v).apply(); }
+    public static void setI(String k, int v) { SharedPreferences x = p(); if (x != null) x.edit().putInt(k, v).apply(); }
 
     public static float f(String k, float def) { SharedPreferences x = p(); return x == null ? def : x.getFloat(k, def); }
-    public static void f(String k, float v) { SharedPreferences x = p(); if (x != null) x.edit().putFloat(k, v).apply(); }
+    public static void setF(String k, float v) { SharedPreferences x = p(); if (x != null) x.edit().putFloat(k, v).apply(); }
 
     public static boolean b(String k, boolean def) { SharedPreferences x = p(); return x == null ? def : x.getBoolean(k, def); }
-    public static void b(String k, boolean v) { SharedPreferences x = p(); if (x != null) x.edit().putBoolean(k, v).apply(); }
+    public static void setB(String k, boolean v) { SharedPreferences x = p(); if (x != null) x.edit().putBoolean(k, v).apply(); }
 
     public static JSONArray arr(String k) {
         try { String v = s(k, null); return v == null ? new JSONArray() : new JSONArray(v); }
         catch (Throwable t) { return new JSONArray(); }
     }
-    public static void arr(String k, JSONArray a) { s(k, a == null ? null : a.toString()); }
+    public static void arr(String k, JSONArray a) { setS(k, a == null ? null : a.toString()); }
 
     public static JSONObject obj(String k) {
         try { String v = s(k, null); return v == null ? null : new JSONObject(v); }
         catch (Throwable t) { return null; }
     }
-    public static void obj(String k, JSONObject o) { s(k, o == null ? null : o.toString()); }
+    public static void obj(String k, JSONObject o) { setS(k, o == null ? null : o.toString()); }
 
     // ---- files: <filesDir>/8ubah[/sub] ----
     public static File dir(String sub) {

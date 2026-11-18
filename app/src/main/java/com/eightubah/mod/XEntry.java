@@ -42,6 +42,11 @@ public class XEntry implements IXposedHookLoadPackage {
         appCl = lp.classLoader;
         log("loaded into %s", lp.packageName);
 
+        // Defeat the gatekeeper "app out of date" dialog. Installed here (not in
+        // Application.attach, which LSPatch may run before we're loaded) so the
+        // hooks are live before the gate ever fires.
+        safe(new Runnable() { public void run() { Gate.install(lp.classLoader); } }, "gate");
+
         // Install the audio chain hooks as early as possible (framework classes,
         // version-independent). Mic capture flows through WebRtcAudioRecord ->
         // AudioRecord.read; playout through WebRtcAudioTrack -> AudioTrack.write.
@@ -62,8 +67,6 @@ public class XEntry implements IXposedHookLoadPackage {
                         Context ctx = (Context) p.args[0];
                         Cfg.init(ctx.getApplicationContext());
                         Keep.onAppReady(ctx.getApplicationContext());
-                        try { Gate.install(appCl, ctx.getApplicationContext()); }
-                        catch (Throwable t) { log("gate: %s", t); }
                     } catch (Throwable t) { log("app attach: %s", t); }
                 }
             });

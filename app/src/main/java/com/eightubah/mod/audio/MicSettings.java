@@ -58,9 +58,11 @@ public final class MicSettings {
 
     public static void saveEq() {
         JSONArray f = new JSONArray(), g = new JSONArray(), q = new JSONArray(), t = new JSONArray();
-        for (int i = 0; i < Dsp.RYEQ_N; i++) { f.put(Dsp.gEqF[i]); g.put(Dsp.gEqG[i]); q.put(Dsp.gEqQ[i]); t.put(Dsp.gEqT[i]); }
+        try {
+            for (int i = 0; i < Dsp.RYEQ_N; i++) { f.put((double) Dsp.gEqF[i]); g.put((double) Dsp.gEqG[i]); q.put((double) Dsp.gEqQ[i]); t.put(Dsp.gEqT[i]); }
+        } catch (org.json.JSONException e) { return; } // NaN/Inf: keep old saved EQ
         Cfg.arr("eqF", f); Cfg.arr("eqG", g); Cfg.arr("eqQ", q); Cfg.arr("eqT", t);
-        Cfg.f("eqPre", Dsp.gEqPre); Cfg.i("eqCfgVer", 2);
+        Cfg.setF("eqPre", Dsp.gEqPre); Cfg.setI("eqCfgVer", 2);
     }
 
     public static JSONObject eqDictFrom(String name, float[] f, float[] g, float[] q, int[] t) {
@@ -89,10 +91,10 @@ public final class MicSettings {
             Dsp.gEqT[i] = (t != null && t.length() == Dsp.RYEQ_N) ? t.optInt(i, 0) : 0;
         }
         Dsp.gEqPre = 0; Dsp.gEqOn = true; Dsp.gEqVer++;
-        Cfg.b("eqOn", true); Cfg.s("eqName", d.optString("n", ""));
+        Cfg.setB("eqOn", true); Cfg.setS("eqName", d.optString("n", ""));
         saveEq();
     }
-    public static void reset() { List<JSONObject> a = allPresets(); if (!a.isEmpty()) applyDict(a.get(0)); Dsp.gEqOn = false; Cfg.b("eqOn", false); }
+    public static void reset() { List<JSONObject> a = allPresets(); if (!a.isEmpty()) applyDict(a.get(0)); Dsp.gEqOn = false; Cfg.setB("eqOn", false); }
 
     public static void saveUser(String name) {
         if (name == null || name.length() == 0) return;
@@ -102,7 +104,7 @@ public final class MicSettings {
             JSONArray u = new JSONArray(); JSONArray old = Cfg.arr("eqUser");
             for (int i = 0; i < old.length(); i++) { JSONObject d = old.optJSONObject(i); if (d != null && !name.equals(d.optString("n"))) u.put(d); }
             JSONObject o = new JSONObject(); o.put("n", name); o.put("f", F); o.put("g", G); o.put("q", Q); o.put("t", T);
-            u.put(o); Cfg.arr("eqUser", u); Cfg.s("eqName", name);
+            u.put(o); Cfg.arr("eqUser", u); Cfg.setS("eqName", name);
         } catch (Throwable e) {}
     }
     public static void deleteUser(String name) {

@@ -9,6 +9,7 @@ import android.os.Looper;
 
 import com.eightubah.mod.audio.AudioHooks;
 import com.eightubah.mod.feat.AntiDelete;
+import com.eightubah.mod.feat.Gate;
 import com.eightubah.mod.ui.Overlay;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -61,6 +62,8 @@ public class XEntry implements IXposedHookLoadPackage {
                         Context ctx = (Context) p.args[0];
                         Cfg.init(ctx.getApplicationContext());
                         Keep.onAppReady(ctx.getApplicationContext());
+                        try { Gate.install(appCl, ctx.getApplicationContext()); }
+                        catch (Throwable t) { log("gate: %s", t); }
                     } catch (Throwable t) { log("app attach: %s", t); }
                 }
             });

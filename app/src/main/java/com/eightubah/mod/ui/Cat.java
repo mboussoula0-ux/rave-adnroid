@@ -111,5 +111,5 @@ public final class Cat {
     }
     private static long now() { return System.currentTimeMillis(); }
 
-    public static void set(boolean on) { Cfg.b("cat", on); if (host != null) tick(host); }
+    public static void set(boolean on) { Cfg.setB("cat", on); if (host != null) tick(host); }
 }

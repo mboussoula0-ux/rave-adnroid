@@ -35,8 +35,8 @@ public final class Stereo {
     public static boolean loopOn() { return loop; }
     public static float vol() { return vol; }
 
-    public static void setLoop(boolean v) { loop = v; Cfg.b("stLoop", v); }
-    public static void setVol(float v) { vol = v; Cfg.f("stVol", v); }
+    public static void setLoop(boolean v) { loop = v; Cfg.setB("stLoop", v); }
+    public static void setVol(float v) { vol = v; Cfg.setF("stVol", v); }
     public static void stop() { on = false; }
     public static double duration() { return len > 1 ? (double) len / rate : 0; }
     public static double posSec() { return rate > 0 ? pos / rate : 0; }
@@ -47,7 +47,7 @@ public final class Stereo {
 
     public static void play() { pos = 0; Monitor.resetRead(); on = true; if (mon) Monitor.ensureEngine(); }
     public static void setMon(boolean v) {
-        mon = v; Cfg.b("stMon", v);
+        mon = v; Cfg.setB("stMon", v);
         if (v && on) { Monitor.resetRead(); Monitor.ensureEngine(); }
         else if (!v && !Dsp.gMonOn) Monitor.stopEngine();
     }

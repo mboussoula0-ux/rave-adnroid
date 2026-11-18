@@ -29,7 +29,7 @@ public final class Lic {
         String d = Cfg.s("devId", null);
         if (d != null && d.length() > 0) return d;
         String v = UUID.randomUUID().toString();
-        Cfg.s("devId", v);
+        Cfg.setS("devId", v);
         return v;
     }
 
@@ -71,9 +71,9 @@ public final class Lic {
                 final boolean fok = ok; final String freason = reason;
                 XEntry.main(new Runnable() { public void run() {
                     if (fok) {
-                        Cfg.s("licHash", h);
-                        Cfg.b("unlocked", true);
-                        Cfg.f("licTs", (float) (System.currentTimeMillis() / 1000.0));
+                        Cfg.setS("licHash", h);
+                        Cfg.setB("unlocked", true);
+                        Cfg.setF("licTs", (float) (System.currentTimeMillis() / 1000.0));
                     }
                     if (done != null) done.run(fok, freason);
                 }});
@@ -103,7 +103,7 @@ public final class Lic {
                     boolean unbound = "not_bound".equals(why)
                             && (System.currentTimeMillis() / 1000.0 - Cfg.f("licTs", 0)) > 600;
                     if (!isHard && !unbound) return;
-                    XEntry.main(new Runnable() { public void run() { Cfg.b("unlocked", false); } });
+                    XEntry.main(new Runnable() { public void run() { Cfg.setB("unlocked", false); } });
                 } catch (Throwable t) { /* offline: never punish a dropped connection */ }
             }
         }).start();

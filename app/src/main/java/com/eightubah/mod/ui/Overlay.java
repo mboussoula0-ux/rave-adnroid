@@ -79,7 +79,7 @@ public final class Overlay {
                         if (Math.abs(e.getRawX() - sx) > 10 || Math.abs(e.getRawY() - sy) > 10) moved = true; return true;
                     case MotionEvent.ACTION_UP:
                         if (!moved) openPanel();
-                        else { Cfg.f("bx", v.getTranslationX()); Cfg.f("by", v.getTranslationY()); }
+                        else { Cfg.setF("bx", v.getTranslationX()); Cfg.setF("by", v.getTranslationY()); }
                         return true;
                 }
                 return false;

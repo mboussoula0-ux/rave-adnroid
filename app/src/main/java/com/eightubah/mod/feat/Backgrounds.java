@@ -127,5 +127,5 @@ public final class Backgrounds {
         }
     }
 
-    public static void set(String mode, String value) { Cfg.s("bgMode", mode); Cfg.s("bgValue", value); }
+    public static void set(String mode, String value) { Cfg.setS("bgMode", mode); Cfg.setS("bgValue", value); }
 }

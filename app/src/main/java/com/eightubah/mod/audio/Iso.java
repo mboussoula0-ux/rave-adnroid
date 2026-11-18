@@ -16,6 +16,6 @@ public final class Iso {
     public static volatile long vpN = 0, rtcN = 0, sessN = 0;
 
     public static void save() {
-        Cfg.b("isoSess", sess); Cfg.b("isoVP", vp); Cfg.b("isoRTC", rtc);
+        Cfg.setB("isoSess", sess); Cfg.setB("isoVP", vp); Cfg.setB("isoRTC", rtc);
     }
 }

@@ -293,16 +293,16 @@ public final class Dsp {
     }
 
     // ---- setters mirroring the iOS RYMic* helpers (persist to Cfg) ----
-    public static void setMicOn(boolean on) { gMicOn = on; com.eightubah.mod.Cfg.b("micOn", on); }
-    public static void setDist(boolean on) { gMicDist = on; com.eightubah.mod.Cfg.b("micDist", on); }
-    public static void setRevMic(int v) { if (v < 0) v = 0; if (v > 100) v = 100; gRevMic = v; com.eightubah.mod.Cfg.i("revMic", v); }
-    public static void setRevSong(int v) { if (v < 0) v = 0; if (v > 100) v = 100; gRevSong = v; com.eightubah.mod.Cfg.i("revSong", v); }
+    public static void setMicOn(boolean on) { gMicOn = on; com.eightubah.mod.Cfg.setB("micOn", on); }
+    public static void setDist(boolean on) { gMicDist = on; com.eightubah.mod.Cfg.setB("micDist", on); }
+    public static void setRevMic(int v) { if (v < 0) v = 0; if (v > 100) v = 100; gRevMic = v; com.eightubah.mod.Cfg.setI("revMic", v); }
+    public static void setRevSong(int v) { if (v < 0) v = 0; if (v > 100) v = 100; gRevSong = v; com.eightubah.mod.Cfg.setI("revSong", v); }
     public static void setMute(boolean on) { gMicMute = on; } // not persisted, like iOS
-    public static void setEqOn(boolean on) { gEqOn = on; gEqVer++; com.eightubah.mod.Cfg.b("eqOn", on); }
+    public static void setEqOn(boolean on) { gEqOn = on; gEqVer++; com.eightubah.mod.Cfg.setB("eqOn", on); }
     public static void applyPreset(int idx) {
         if (idx < 0 || idx >= N_PRESETS) return; Preset p = kPresets[idx];
         gMicPreset = idx; gMicSemi = p.semi; gMicMode = p.mode; gMicEcho = p.echo;
-        com.eightubah.mod.Cfg.i("micPreset", idx); com.eightubah.mod.Cfg.f("micSemi", p.semi);
-        com.eightubah.mod.Cfg.i("micMode", p.mode); com.eightubah.mod.Cfg.f("micEcho", p.echo);
+        com.eightubah.mod.Cfg.setI("micPreset", idx); com.eightubah.mod.Cfg.setF("micSemi", p.semi);
+        com.eightubah.mod.Cfg.setI("micMode", p.mode); com.eightubah.mod.Cfg.setF("micEcho", p.echo);
     }
 }

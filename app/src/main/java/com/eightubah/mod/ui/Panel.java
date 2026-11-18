@@ -208,9 +208,9 @@ public class Panel extends Dialog {
         }
         add(Ui.card(c, Ui.label(c, L.t("تدرجات", "Gradients"), 15, true, 0), Ui.grid(c, gs, 3)));
 
-        add(Ui.card(c, Ui.slider(c, L.t("التمويه", "Blur"), null, 0, 100, Cfg.f("blur", 0), 0, true, v -> Cfg.f("blur", v))));
-        add(Ui.card(c, Ui.slider(c, L.t("التعتيم", "Dim"), null, 0, 100, Cfg.f("dim", 30), 0, true, v -> Cfg.f("dim", v))));
-        add(Ui.button(c, L.t("رجوع للافتراضي", "Reset"), false, () -> { Backgrounds.set("none", ""); Cfg.f("blur", 0); Cfg.f("dim", 30); rebuild(); }));
+        add(Ui.card(c, Ui.slider(c, L.t("التمويه", "Blur"), null, 0, 100, Cfg.f("blur", 0), 0, true, v -> Cfg.setF("blur", v))));
+        add(Ui.card(c, Ui.slider(c, L.t("التعتيم", "Dim"), null, 0, 100, Cfg.f("dim", 30), 0, true, v -> Cfg.setF("dim", v))));
+        add(Ui.button(c, L.t("رجوع للافتراضي", "Reset"), false, () -> { Backgrounds.set("none", ""); Cfg.setF("blur", 0); Cfg.setF("dim", 30); rebuild(); }));
     }
     private void saveBgFromUri(Uri u) {
         try (InputStream is = c().getContentResolver().openInputStream(u)) {
@@ -264,7 +264,7 @@ public class Panel extends Dialog {
             if (on && Cfg.arr("messages").length() == 0) { toast(L.t("أضف رسالة أول", "Add a message first")); rebuild(); return; }
             QuickMessages.setLoop(on);
         })));
-        add(Ui.card(c, Ui.slider(c, L.t("الفاصل (ثانية)", "Delay (s)"), "s", 0.4f, 30, Math.min(30, Math.max(0.4f, Cfg.f("msgDelay", 4f))), 1, true, v -> Cfg.f("msgDelay", v))));
+        add(Ui.card(c, Ui.slider(c, L.t("الفاصل (ثانية)", "Delay (s)"), "s", 0.4f, 30, Math.min(30, Math.max(0.4f, Cfg.f("msgDelay", 4f))), 1, true, v -> Cfg.setF("msgDelay", v))));
         for (int i = 0; i < msgs.length(); i++) {
             final int idx = i; final String m = msgs.optString(i, "");
             Button send = Ui.button(c, m, true, () -> QuickMessages.send(act, m, code -> XEntry.main(() ->
@@ -331,16 +331,16 @@ public class Panel extends Dialog {
             presets.add(Ui.button(c, n, i == Dsp.gMicPreset, () -> { Dsp.applyPreset(idx); Dsp.setMicOn(true); rebuild(); }));
         }
         add(Ui.card(c, Ui.label(c, L.t("الأصوات", "Voices"), 15, true, 0), Ui.grid(c, presets, 3)));
-        add(Ui.card(c, Ui.slider(c, L.t("درجة الصوت", "Pitch"), null, -12, 12, Dsp.gMicSemi, 0, true, v -> { Dsp.gMicSemi = v; Dsp.gMicPreset = -1; Cfg.f("micSemi", v); Cfg.i("micPreset", -1); })));
-        add(Ui.card(c, Ui.slider(c, L.t("الصدى", "Echo"), null, 0, 1, Dsp.gMicEcho, 2, true, v -> { Dsp.gMicEcho = v; Cfg.f("micEcho", v); })));
-        add(Ui.card(c, Ui.slider(c, L.t("مستوى المايك", "Mic level"), null, 0.5f, 2, Dsp.gMicGain, 2, true, v -> { Dsp.gMicGain = v; Cfg.f("micGain", v); })));
+        add(Ui.card(c, Ui.slider(c, L.t("درجة الصوت", "Pitch"), null, -12, 12, Dsp.gMicSemi, 0, true, v -> { Dsp.gMicSemi = v; Dsp.gMicPreset = -1; Cfg.setF("micSemi", v); Cfg.setI("micPreset", -1); })));
+        add(Ui.card(c, Ui.slider(c, L.t("الصدى", "Echo"), null, 0, 1, Dsp.gMicEcho, 2, true, v -> { Dsp.gMicEcho = v; Cfg.setF("micEcho", v); })));
+        add(Ui.card(c, Ui.slider(c, L.t("مستوى المايك", "Mic level"), null, 0.5f, 2, Dsp.gMicGain, 2, true, v -> { Dsp.gMicGain = v; Cfg.setF("micGain", v); })));
         add(Ui.card(c, Ui.label(c, L.t("فضي", "Silver"), 15, true, 0), Ui.switchRow(c, L.t("مضخم", "Amplifier"), Dsp.gMicDist, 0, Dsp::setDist)));
         add(Ui.card(c, Ui.slider(c, L.t("الصدى (كهف مسكون)", "Echo (Haunted Cavern)"), null, 0, 100, Dsp.gRevMic, 0, true, v -> Dsp.setRevMic(Math.round(v)))));
         add(Ui.card(c, Ui.switchRow(c, L.t("اسمع صوتي", "Hear my voice"), Dsp.gMonOn, 0, on -> { if (on) Monitor.start(); else Monitor.stop(); })));
         add(Ui.card(c, Ui.label(c, L.t("إعدادات المضخم", "Amplifier settings"), 15, true, 0),
-            Ui.slider(c, L.t("التضخيم", "Gain"), "dB", 0, 120, Cfg.f("distDb", 60), 0, true, v -> { Dsp.gDistGain = (float) Math.pow(10, v / 20); Cfg.f("distDb", v); }),
-            Ui.slider(c, L.t("الخروج", "Output"), "dB", -30, 0, Cfg.f("distOutDb", -3), 0, true, v -> { Dsp.gDistOut = (float) Math.pow(10, v / 20); Cfg.f("distOutDb", v); }),
-            Ui.slider(c, L.t("عتبة الكتم", "Gate"), "dB", -80, -30, Cfg.f("distGateDb", -55), 0, true, v -> { Dsp.gDistGate = (float) Math.pow(10, v / 20); Cfg.f("distGateDb", v); })));
+            Ui.slider(c, L.t("التضخيم", "Gain"), "dB", 0, 120, Cfg.f("distDb", 60), 0, true, v -> { Dsp.gDistGain = (float) Math.pow(10, v / 20); Cfg.setF("distDb", v); }),
+            Ui.slider(c, L.t("الخروج", "Output"), "dB", -30, 0, Cfg.f("distOutDb", -3), 0, true, v -> { Dsp.gDistOut = (float) Math.pow(10, v / 20); Cfg.setF("distOutDb", v); }),
+            Ui.slider(c, L.t("عتبة الكتم", "Gate"), "dB", -80, -30, Cfg.f("distGateDb", -55), 0, true, v -> { Dsp.gDistGate = (float) Math.pow(10, v / 20); Cfg.setF("distGateDb", v); })));
         add(Ui.card(c, Ui.label(c, L.t("إزالة عوازل ريف", "Remove Rave isolation"), 15, true, 0),
             Ui.switchRow(c, L.t("معالج الصوت (صدى/ضجيج/AGC)", "Voice processing (AEC/NS/AGC)"), Iso.vp, 0, on -> { Iso.vp = on; Iso.save(); }),
             Ui.switchRow(c, L.t("وضع الجلسة", "Session mode"), Iso.sess, 0, on -> { Iso.sess = on; Iso.save(); }),
@@ -361,7 +361,7 @@ public class Panel extends Dialog {
         Context c = c();
         Button choose = Ui.button(c, L.t("ملف", "File"), false, () ->
             Pick.pick(act, "*/*", Pick.REQ_STEREO, (rc, data) -> { if (rc == Activity.RESULT_OK && data != null && data.getData() != null) loadStereo(data.getData()); }));
-        Button remove = Ui.button(c, L.t("حذف", "Remove"), false, () -> { Stereo.free(); Cfg.s("stName", null); Cfg.s("stFile", null); rebuild(); });
+        Button remove = Ui.button(c, L.t("حذف", "Remove"), false, () -> { Stereo.free(); Cfg.setS("stName", null); Cfg.setS("stFile", null); rebuild(); });
         String nm = Cfg.s("stName", null);
         add(Ui.card(c, Ui.label(c, L.t("ملف الصوت أو الفيديو", "Audio/video file"), 16, true, 0),
             Ui.label(c, Stereo.isLoading() ? L.t("جاري التحميل…", "Loading…") : (nm != null ? nm : L.t("ما فيه ملف", "No file")), 13, false, L.MUTED),
@@ -393,7 +393,7 @@ public class Panel extends Dialog {
             try (InputStream is = c().getContentResolver().openInputStream(u); FileOutputStream os = new FileOutputStream(dst)) {
                 byte[] b = new byte[8192]; int n; while ((n = is.read(b)) > 0) os.write(b, 0, n);
             }
-            Cfg.s("stName", last != null ? last : dst.getName()); Cfg.s("stFile", dst.getName());
+            Cfg.setS("stName", last != null ? last : dst.getName()); Cfg.setS("stFile", dst.getName());
             toast(L.t("جاري التحميل…", "Loading…"));
             Stereo.decode(dst.getAbsolutePath(), (ok, msg) -> { toast(msg); rebuild(); });
         } catch (Throwable t) { toast(L.t("تعذر فتح الملف", "Could not open the file")); }
@@ -431,20 +431,20 @@ public class Panel extends Dialog {
         Button edit = Ui.button(c, eqEdit ? L.t("تم", "Done") : L.t("تعديل", "Edit"), eqEdit, () -> { eqEdit = !eqEdit; rebuild(); });
         LinearLayout graphCard = Ui.card(c, Ui.hstack(c, 8, wrap(Ui.switchRow(c, L.t("الإيكولايزر", "Equalizer"), Dsp.gEqOn, 0, on -> { Dsp.setEqOn(on); gv.invalidate(); }), 1f), edit), gv, st);
         add(graphCard);
-        add(Ui.card(c, Ui.slider(c, L.t("المستوى", "Preamp"), "dB", -12, 12, Dsp.gEqPre, 1, true, v -> { Dsp.gEqPre = v; Dsp.gEqVer++; Cfg.f("eqPre", v); gv.invalidate(); })));
+        add(Ui.card(c, Ui.slider(c, L.t("المستوى", "Preamp"), "dB", -12, 12, Dsp.gEqPre, 1, true, v -> { Dsp.gEqPre = v; Dsp.gEqVer++; Cfg.setF("eqPre", v); gv.invalidate(); })));
 
-        add(Ui.card(c, Ui.switchRow(c, "Clearcast AI", Dsp.gNcOn, 0, on -> { Dsp.gNcOn = on; Cfg.b("ncOn", on); }),
-            Ui.slider(c, null, null, 0, 1, Dsp.gNcAmt, 2, true, v -> { Dsp.gNcAmt = v; Cfg.f("ncAmt", v); })));
+        add(Ui.card(c, Ui.switchRow(c, "Clearcast AI", Dsp.gNcOn, 0, on -> { Dsp.gNcOn = on; Cfg.setB("ncOn", on); }),
+            Ui.slider(c, null, null, 0, 1, Dsp.gNcAmt, 2, true, v -> { Dsp.gNcAmt = v; Cfg.setF("ncAmt", v); })));
         add(Ui.card(c, Ui.label(c, L.t("تقليل الضوضاء", "Noise Reduction"), 15, true, 0),
-            Ui.switchRow(c, L.t("الخلفية", "Background"), Dsp.gNrBgOn, 0, on -> { Dsp.gNrBgOn = on; Cfg.b("nrBgOn", on); }),
-            Ui.slider(c, null, null, 0, 1, Dsp.gNrBg, 2, true, v -> { Dsp.gNrBg = v; Cfg.f("nrBg", v); }),
-            Ui.switchRow(c, L.t("الارتطام", "Impact"), Dsp.gNrImpOn, 0, on -> { Dsp.gNrImpOn = on; Cfg.b("nrImpOn", on); }),
-            Ui.slider(c, null, null, 0, 1, Dsp.gNrImp, 2, true, v -> { Dsp.gNrImp = v; Cfg.f("nrImp", v); })));
-        add(Ui.card(c, Ui.switchRow(c, L.t("بوابة الضوضاء", "Noise Gate"), Dsp.gGateOn, 0, on -> { Dsp.gGateOn = on; Cfg.b("gateOn", on); }),
-            Ui.slider(c, L.t("العتبة", "Threshold"), "dB", -80, -20, Dsp.gGateThr, 1, !Dsp.gGateAuto, v -> { Dsp.gGateThr = v; Cfg.f("gateThr", v); }),
-            Ui.switchRow(c, L.t("تلقائي", "Auto"), Dsp.gGateAuto, 0, on -> { Dsp.gGateAuto = on; Cfg.b("gateAuto", on); rebuild(); })));
-        add(Ui.card(c, Ui.switchRow(c, L.t("الكومبريسر", "Compressor"), Dsp.gCompOn, 0, on -> { Dsp.gCompOn = on; Cfg.b("compOn", on); }),
-            Ui.slider(c, L.t("المستوى", "Level"), null, 0, 1, Dsp.gCompLvl, 2, true, v -> { Dsp.gCompLvl = v; Cfg.f("compLvl", v); })));
+            Ui.switchRow(c, L.t("الخلفية", "Background"), Dsp.gNrBgOn, 0, on -> { Dsp.gNrBgOn = on; Cfg.setB("nrBgOn", on); }),
+            Ui.slider(c, null, null, 0, 1, Dsp.gNrBg, 2, true, v -> { Dsp.gNrBg = v; Cfg.setF("nrBg", v); }),
+            Ui.switchRow(c, L.t("الارتطام", "Impact"), Dsp.gNrImpOn, 0, on -> { Dsp.gNrImpOn = on; Cfg.setB("nrImpOn", on); }),
+            Ui.slider(c, null, null, 0, 1, Dsp.gNrImp, 2, true, v -> { Dsp.gNrImp = v; Cfg.setF("nrImp", v); })));
+        add(Ui.card(c, Ui.switchRow(c, L.t("بوابة الضوضاء", "Noise Gate"), Dsp.gGateOn, 0, on -> { Dsp.gGateOn = on; Cfg.setB("gateOn", on); }),
+            Ui.slider(c, L.t("العتبة", "Threshold"), "dB", -80, -20, Dsp.gGateThr, 1, !Dsp.gGateAuto, v -> { Dsp.gGateThr = v; Cfg.setF("gateThr", v); }),
+            Ui.switchRow(c, L.t("تلقائي", "Auto"), Dsp.gGateAuto, 0, on -> { Dsp.gGateAuto = on; Cfg.setB("gateAuto", on); rebuild(); })));
+        add(Ui.card(c, Ui.switchRow(c, L.t("الكومبريسر", "Compressor"), Dsp.gCompOn, 0, on -> { Dsp.gCompOn = on; Cfg.setB("compOn", on); }),
+            Ui.slider(c, L.t("المستوى", "Level"), null, 0, 1, Dsp.gCompLvl, 2, true, v -> { Dsp.gCompLvl = v; Cfg.setF("compLvl", v); })));
         add(Ui.button(c, L.t("استيراد (من الحافظة)", "Import (clipboard)"), false, () -> {
             android.content.ClipboardManager cm = (android.content.ClipboardManager) c.getSystemService(Context.CLIPBOARD_SERVICE);
             CharSequence t = cm != null && cm.hasPrimaryClip() && cm.getPrimaryClip().getItemCount() > 0 ? cm.getPrimaryClip().getItemAt(0).getText() : null;
@@ -504,14 +504,14 @@ public class Panel extends Dialog {
         LinearLayout langRow = new LinearLayout(c); langRow.setOrientation(LinearLayout.HORIZONTAL);
         String[] langs = {"auto", "ar", "en"}; String[] langLabel = {L.t("تلقائي", "Auto"), "العربية", "English"};
         String curLang = Cfg.s("lang", "ar");
-        for (int i = 0; i < 3; i++) { final String lv = langs[i]; langRow.addView(Ui.button(c, langLabel[i], lv.equals(curLang), () -> { Cfg.s("lang", lv); rebuild(); }), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)); }
+        for (int i = 0; i < 3; i++) { final String lv = langs[i]; langRow.addView(Ui.button(c, langLabel[i], lv.equals(curLang), () -> { Cfg.setS("lang", lv); rebuild(); }), new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)); }
         add(Ui.card(c, Ui.label(c, L.t("لغة الواجهة", "Language"), 15, true, 0), langRow));
         // accent
         List<View> accents = new ArrayList<>(); String[] acc = L.accents();
-        for (int i = 0; i < acc.length; i++) { final int idx = i; Button b = new Button(c); b.setBackground(Ui.round(L.hex(acc[i]), Ui.dp(c, 18))); b.setMinHeight(Ui.dp(c, 36)); b.setOnClickListener(v -> { Cfg.i("accent", idx); rebuild(); }); accents.add(b); }
+        for (int i = 0; i < acc.length; i++) { final int idx = i; Button b = new Button(c); b.setBackground(Ui.round(L.hex(acc[i]), Ui.dp(c, 18))); b.setMinHeight(Ui.dp(c, 36)); b.setOnClickListener(v -> { Cfg.setI("accent", idx); rebuild(); }); accents.add(b); }
         add(Ui.card(c, Ui.label(c, L.t("لون التمييز", "Accent colour"), 15, true, 0), Ui.grid(c, accents, 6)));
         // auto open
-        add(Ui.card(c, Ui.switchRow(c, L.t("افتح اللوحة تلقائيًا عند دخول الغرفة", "Open panel on entering a room"), Cfg.b("autoOpen", false), 0, on -> Cfg.b("autoOpen", on))));
+        add(Ui.card(c, Ui.switchRow(c, L.t("افتح اللوحة تلقائيًا عند دخول الغرفة", "Open panel on entering a room"), Cfg.b("autoOpen", false), 0, on -> Cfg.setB("autoOpen", on))));
         // anti-delete
         add(Ui.card(c, Ui.switchRow(c, L.t("حفظ الرسائل المحذوفة (عندك بس)", "Keep deleted messages (local)"), AntiDelete.on, 0, AntiDelete::setOn),
             Ui.label(c, L.t("المحفوظ: ", "Saved: ") + AntiDelete.count(), 12, false, L.MUTED),
@@ -520,13 +520,13 @@ public class Panel extends Dialog {
         // key
         List<View> key = new ArrayList<>(); key.add(Ui.label(c, L.t("المفتاح", "Key"), 15, true, 0));
         key.add(Ui.label(c, Cfg.locked() ? L.t("الحالة: مقفول", "Status: locked") : L.t("الحالة: مفتوح", "Status: unlocked"), 13, false, L.MUTED));
-        if (!Cfg.locked()) key.add(Ui.button(c, L.t("قفل / تغيير المفتاح", "Lock / change key"), true, () -> { Cfg.b("unlocked", false); Cfg.s("licHash", null); rebuild(); }));
+        if (!Cfg.locked()) key.add(Ui.button(c, L.t("قفل / تغيير المفتاح", "Lock / change key"), true, () -> { Cfg.setB("unlocked", false); Cfg.setS("licHash", null); rebuild(); }));
         add(Ui.card(c, key.toArray(new View[0])));
         // advanced tunables
         add(Ui.card(c, Ui.label(c, L.t("متقدم", "Advanced"), 15, true, 0),
-            Ui.button(c, L.t("اسم العلامة: ", "Brand: ") + com.eightubah.mod.feat.Branding.brand(), false, () -> ask(L.t("الاسم بدل rave", "Name instead of rave"), "8ubah", false, s -> { Cfg.s("brandName", s.length() > 0 ? s : null); Cfg.b("brandOn", s.length() > 0); rebuild(); })),
-            Ui.button(c, L.t("اسم شاشة الغرفة: ", "Room class: ") + Cfg.s("roomClass", "RaveActivity"), false, () -> ask(L.t("اسم الكلاس", "Class name"), "RaveActivity", false, s -> { Cfg.s("roomClass", s.length() > 0 ? s : null); rebuild(); })),
-            Ui.button(c, L.t("كلاس الحذف (DAO): ", "Delete DAO class: ") + shortName(Cfg.s("daoClass", "com.wemesh.android.legacy.dms.db.MessageDao_Impl")), false, () -> ask("DAO class", "MessageDao_Impl", false, s -> { if (s.length() > 0) Cfg.s("daoClass", s); rebuild(); }))));
+            Ui.button(c, L.t("اسم العلامة: ", "Brand: ") + com.eightubah.mod.feat.Branding.brand(), false, () -> ask(L.t("الاسم بدل rave", "Name instead of rave"), "8ubah", false, s -> { Cfg.setS("brandName", s.length() > 0 ? s : null); Cfg.setB("brandOn", s.length() > 0); rebuild(); })),
+            Ui.button(c, L.t("اسم شاشة الغرفة: ", "Room class: ") + Cfg.s("roomClass", "RaveActivity"), false, () -> ask(L.t("اسم الكلاس", "Class name"), "RaveActivity", false, s -> { Cfg.setS("roomClass", s.length() > 0 ? s : null); rebuild(); })),
+            Ui.button(c, L.t("كلاس الحذف (DAO): ", "Delete DAO class: ") + shortName(Cfg.s("daoClass", "com.wemesh.android.legacy.dms.db.MessageDao_Impl")), false, () -> ask("DAO class", "MessageDao_Impl", false, s -> { if (s.length() > 0) Cfg.setS("daoClass", s); rebuild(); }))));
     }
     private String shortName(String s) { int i = s.lastIndexOf('.'); return i >= 0 ? s.substring(i + 1) : s; }
     private void showDeleted() {

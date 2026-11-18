@@ -122,5 +122,5 @@ public final class AntiDelete {
         } catch (Throwable t) { /* */ }
     }
 
-    public static void setOn(boolean v) { on = v; Cfg.b("antiDelete", v); }
+    public static void setOn(boolean v) { on = v; Cfg.setB("antiDelete", v); }
 }

@@ -28,6 +28,10 @@ public final class AudioHooks {
     private static final Vs micVs = new Vs();
     public static volatile long frames = 0;   // mic frames processed (for the status line)
     public static volatile long voiceFrames = 0;
+    // per-thread read nesting depth, so a delegated read isn't processed twice
+    private static final ThreadLocal<int[]> readDepth = new ThreadLocal<int[]>() {
+        @Override protected int[] initialValue() { return new int[1]; }
+    };
     private static final ThreadLocal<float[]> TL = new ThreadLocal<>();
     private static float[] tl(int n) { float[] a = TL.get(); if (a == null || a.length < n) { a = new float[Math.max(n, 2048)]; TL.set(a); } return a; }
 
@@ -40,7 +44,12 @@ public final class AudioHooks {
         com.eightubah.mod.Diag.log("audio hooks installed");
 
         XC_MethodHook micHook = new XC_MethodHook() {
+            // AudioRecord.read(bb,size) delegates to read(bb,size,mode); both are hooked,
+            // so without this guard each physical read is processed TWICE (2x speed/noise).
+            // Count nesting and process only at the outermost read.
+            @Override protected void beforeHookedMethod(MethodHookParam p) { readDepth.get()[0]++; }
             @Override protected void afterHookedMethod(MethodHookParam p) {
+                int[] dpt = readDepth.get(); if (--dpt[0] != 0) return;
                 try {
                     Object res = p.getResult(); if (!(res instanceof Integer)) return;
                     int bytes = (Integer) res; if (bytes <= 0) return;

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Which apps this module hooks. LSPosed reads this to pre-select scope. -->
-    <string-array name="xposed_scope">
-        <item>com.wemesh.android</item>
-    </string-array>
-</resources>

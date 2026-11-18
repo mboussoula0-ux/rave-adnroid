@@ -32,6 +32,7 @@ public final class AudioHooks {
     private static float[] tl(int n) { float[] a = TL.get(); if (a == null || a.length < n) { a = new float[Math.max(n, 2048)]; TL.set(a); } return a; }
 
     private static int diagN = 0;
+    private static long diagT0 = 0, diagFr = 0; private static boolean diagRate = false;
 
     public static void install() {
         MicSettings.load();
@@ -89,6 +90,9 @@ public final class AudioHooks {
         float[] tmp = tl(frames);
         for (int f = 0; f < frames; f++) tmp[f] = sb.get(f * ch) / 32768f;
         Dsp.micFx(tmp, 0, frames, sr, micVs); AudioHooks.frames += frames;
+        if (diagT0 == 0) diagT0 = System.currentTimeMillis(); diagFr += frames;
+        if (!diagRate) { long el = System.currentTimeMillis() - diagT0; if (el >= 2500) { diagRate = true;
+            com.eightubah.mod.Diag.toast("mic throughput=" + (diagFr * 1000 / Math.max(1, el)) + "/s expect=" + (int) sr); } }
         for (int f = 0; f < frames; f++) {
             float v = tmp[f] * 32767f; short q = (short) (v > 32767f ? 32767 : v < -32768f ? -32768 : v);
             for (int c = 0; c < ch; c++) sb.put(f * ch + c, q);

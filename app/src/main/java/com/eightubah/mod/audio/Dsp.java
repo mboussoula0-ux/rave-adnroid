@@ -246,7 +246,10 @@ public final class Dsp {
         int ed = (int) (0.27 * sr); if (ed >= Vs.RYM_ECHO) ed = Vs.RYM_ECHO - 1;
         final float rph = (float) (2.0 * Math.PI * 70.0 / sr);
         for (int i = 0; i < n; i++) {
-            float in = x[off + i] * gain; if (studio) in = studioIn(in, s, sc); float y = in;
+            float in = x[off + i] * gain;
+            { float ag = in < 0 ? -in : in; s.gate += (ag - s.gate) * (ag > s.gate ? 0.03f : 0.0006f);
+              float gthr = 0.006f; if (s.gate < gthr) { float r = s.gate / gthr; in *= r * r; } }
+            if (studio) in = studioIn(in, s, sc); float y = in;
             if (pitch) {
                 s.hist[s.w & (Vs.RYM_BUF - 1)] = in;
                 float acc = 0;
@@ -263,7 +266,7 @@ public final class Dsp {
             else if (mode == 2) { float hp = 0.95f * (s.hpy + y - s.hpx); s.hpx = y; s.hpy = hp; s.lp += 0.4f * (hp - s.lp); y = (float) Math.tanh(s.lp * 3.0f); }
             if (gMicDist) y = dist(y, s);
             if (revOn) y = rev(y, s, rc);
-            if (echo > 0.01f) { float e = s.eb[(s.ew - ed) & (Vs.RYM_ECHO - 1)]; s.eb[s.ew & (Vs.RYM_ECHO - 1)] = y + e * 0.4f; s.ew++; y += e * echo; }
+            if (echo > 0.01f) { float e = s.eb[(s.ew - ed) & (Vs.RYM_ECHO - 1)]; s.eb[s.ew & (Vs.RYM_ECHO - 1)] = y + e * 0.25f; s.ew++; y += e * echo * 0.55f; }
             if (eqOn) y = eqRun(y, s, eqPre);
             if (compOn) y = comp(y, s, sc);
             if (y > 1f) y = 1f; else if (y < -1f) y = -1f;

@@ -111,7 +111,7 @@ public final class Overlay {
         if (++licTick % 90 == 0) Lic.revalidate();
         Cat.tick(a);
         Backgrounds.sync(a, in);
-        if (entered) com.eightubah.mod.feat.RoomBg.apply(a);
+        if (in && (entered || licTick % 8 == 0)) com.eightubah.mod.feat.RoomBg.apply(a);
         brandTick++;
         if (Cfg.b("brandOn", false) && brandTick % 5 == 1) Branding.walk(a);
     }

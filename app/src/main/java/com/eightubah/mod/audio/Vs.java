@@ -20,6 +20,7 @@ public final class Vs {
     public double sr;
 
     public float dcx, dcy, dlp, env;                 // amplifier (distortion) state
+    public float gate;                               // noise-gate envelope
 
     public final float[][] cb = new float[8][4096];  // 8 comb filters
     public final int[] ci = new int[8];
@@ -45,7 +46,7 @@ public final class Vs {
     public void reset(double sampleRate) {
         java.util.Arrays.fill(hist, 0f); w = 0; d0 = 0; d1 = 0;
         java.util.Arrays.fill(eb, 0f); ew = 0; ph = hpx = hpy = lp = 0;
-        dcx = dcy = dlp = env = 0;
+        dcx = dcy = dlp = env = 0; gate = 0;
         for (float[] c : cb) java.util.Arrays.fill(c, 0f);
         java.util.Arrays.fill(ci, 0); java.util.Arrays.fill(cf, 0f);
         for (float[] a : ab) java.util.Arrays.fill(a, 0f);

@@ -117,28 +117,63 @@ public final class AudioHooks {
         Recorder.voices(tmp, 0, frames, sr);
     }
 
-    // ---- isolation removal: force the system voice-processing effects off ----
+    // ---- isolation removal: kill ALL mic voice-processing, permanently ----
+    // Three layers duck/mute the mic when audio plays or the voice is loud or
+    // effected: (1) the hardware AEC/NS/AGC effects, (2) the OS VOICE_COMMUNICATION
+    // preprocessing WebRTC asks for, (3) WebRTC's own software APM (echo/AGC/NS via
+    // MediaConstraints). We disable all three unconditionally so the mic is raw.
+    private static final XC_MethodHook FALSE_ARG0 = new XC_MethodHook() {
+        @Override protected void beforeHookedMethod(MethodHookParam p) {
+            if (Boolean.TRUE.equals(p.args[0])) { p.args[0] = false; Iso.vpN++; }
+        }
+    };
+    private static final XC_MethodHook RETURN_FALSE = new XC_MethodHook() {
+        @Override protected void beforeHookedMethod(MethodHookParam p) { p.setResult(false); }
+    };
+
+    private static boolean isProcKey(Object k) {
+        if (!(k instanceof String)) return false;
+        String s = ((String) k).toLowerCase();
+        return s.contains("echocancellation") || s.contains("noisesuppression")
+                || s.contains("autogaincontrol") || s.contains("highpassfilter")
+                || s.contains("typingnoisedetection") || s.contains("audiomirroring");
+    }
+
     private static void installIso() {
-        String[] fx = {"android.media.audiofx.AcousticEchoCanceler", "android.media.audiofx.NoiseSuppressor", "android.media.audiofx.AutomaticGainControl"};
+        // (1) hardware effects: never enable, and report unavailable so WebRTC skips them
+        String[] fx = {"android.media.audiofx.AcousticEchoCanceler",
+                       "android.media.audiofx.NoiseSuppressor",
+                       "android.media.audiofx.AutomaticGainControl"};
         for (String cn : fx) {
             try {
                 Class<?> c = Class.forName(cn);
-                XposedHelpers.findAndHookMethod(c, "setEnabled", boolean.class, new XC_MethodHook() {
-                    @Override protected void beforeHookedMethod(MethodHookParam p) {
-                        if (Iso.vp && Boolean.TRUE.equals(p.args[0])) { p.args[0] = false; Iso.vpN++; }
-                    }
-                });
+                try { XposedHelpers.findAndHookMethod(c, "setEnabled", boolean.class, FALSE_ARG0); } catch (Throwable t) { /* */ }
+                try { XposedHelpers.findAndHookMethod(c, "isAvailable", RETURN_FALSE); } catch (Throwable t) { /* */ }
             } catch (Throwable t) { /* class may be absent */ }
         }
+        // (2) WebRTC device module: no hardware AEC/NS, and capture from the raw MIC
+        //     source (1) instead of VOICE_COMMUNICATION, which the OS auto-processes.
         try {
             Class<?> b = XposedHelpers.findClass("org.webrtc.audio.JavaAudioDeviceModule$Builder", XEntry.appCl);
             for (String m : new String[]{"setUseHardwareAcousticEchoCanceler", "setUseHardwareNoiseSuppressor"}) {
-                try {
-                    XposedHelpers.findAndHookMethod(b, m, boolean.class, new XC_MethodHook() {
-                        @Override protected void beforeHookedMethod(MethodHookParam p) { if (Iso.vp) { p.args[0] = false; Iso.vpN++; } }
-                    });
-                } catch (Throwable t) { /* */ }
+                try { XposedHelpers.findAndHookMethod(b, m, boolean.class, FALSE_ARG0); } catch (Throwable t) { /* */ }
             }
+            try {
+                XposedHelpers.findAndHookMethod(b, "setAudioSource", int.class, new XC_MethodHook() {
+                    @Override protected void beforeHookedMethod(MethodHookParam p) {
+                        p.args[0] = 1; /* MediaRecorder.AudioSource.MIC — raw, unprocessed */ Iso.vpN++;
+                    }
+                });
+            } catch (Throwable t) { /* */ }
+        } catch (Throwable t) { /* */ }
+        // (3) WebRTC software APM: flip every echo/NS/AGC/highpass constraint to false
+        try {
+            Class<?> kv = XposedHelpers.findClass("org.webrtc.MediaConstraints$KeyValuePair", XEntry.appCl);
+            XposedHelpers.findAndHookConstructor(kv, String.class, String.class, new XC_MethodHook() {
+                @Override protected void beforeHookedMethod(MethodHookParam p) {
+                    if (isProcKey(p.args[0])) { p.args[1] = "false"; Iso.rtcN++; }
+                }
+            });
         } catch (Throwable t) { /* */ }
     }
 

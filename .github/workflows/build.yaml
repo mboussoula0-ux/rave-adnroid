@@ -23,8 +23,18 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # The ubuntu-latest runner already ships an Android SDK (ANDROID_SDK_ROOT).
+      # We do NOT use android-actions/setup-android — its v3 tries to install the
+      # removed legacy "tools" package and fails. Instead: accept licenses and make
+      # sure platform 34 + build-tools are present, using the preinstalled sdkmanager.
+      - name: Ensure Android SDK packages
+        run: |
+          SDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          MGR="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          echo "Using SDK at $SDK"
+          yes | "$MGR" --licenses >/dev/null 2>&1 || true
+          "$MGR" "platform-tools" "platforms;android-34" "build-tools;34.0.0" || true
+          echo "sdk.dir=$SDK" > local.properties
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4

@@ -31,8 +31,12 @@ public final class AudioHooks {
     private static final ThreadLocal<float[]> TL = new ThreadLocal<>();
     private static float[] tl(int n) { float[] a = TL.get(); if (a == null || a.length < n) { a = new float[Math.max(n, 2048)]; TL.set(a); } return a; }
 
+    private static int diagN = 0;
+
     public static void install() {
         MicSettings.load();
+        com.eightubah.mod.Diag.reset();
+        com.eightubah.mod.Diag.log("audio hooks installed");
 
         XC_MethodHook micHook = new XC_MethodHook() {
             @Override protected void afterHookedMethod(MethodHookParam p) {
@@ -77,6 +81,8 @@ public final class AudioHooks {
     private static void processMicBB(AudioRecord ar, ByteBuffer bb, int bytes) {
         int ch = Math.max(1, ar.getChannelCount()); double sr = ar.getSampleRate();
         int frames = (bytes / 2) / ch; if (frames <= 0) return;
+        if (diagN < 24) { diagN++; com.eightubah.mod.Diag.log("mic(bb) sr=%d ch=%d bytes=%d frames=%d fx=%b stereo=%b eq=%b micOn=%b echo=%.2f rev=%d",
+                (int) sr, ch, bytes, frames, Dsp.fxOn(), Stereo.isOn(), Dsp.gEqOn, Dsp.gMicOn, Dsp.gMicEcho, Dsp.gRevMic); }
         ByteBuffer d = bb.duplicate(); d.order(ByteOrder.LITTLE_ENDIAN); d.clear(); d.limit(bytes);
         ShortBuffer sb = d.asShortBuffer();
         float[] tmp = tl(frames);

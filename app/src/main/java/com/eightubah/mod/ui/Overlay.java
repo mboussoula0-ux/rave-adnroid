@@ -105,11 +105,13 @@ public final class Overlay {
         Activity a = cur.get(); if (a == null) return;
         if (fab != null) fab.setBackground(Ui.round(L.accent(), Ui.dp(a, 26)));
         boolean in = ViewScan.inRoom(a);
-        if (in && !wasIn && Cfg.b("autoOpen", false) && !Cfg.locked()) openPanel();
+        boolean entered = in && !wasIn;
+        if (entered && Cfg.b("autoOpen", false) && !Cfg.locked()) openPanel();
         wasIn = in;
         if (++licTick % 90 == 0) Lic.revalidate();
         Cat.tick(a);
         Backgrounds.sync(a, in);
+        if (entered) com.eightubah.mod.feat.RoomBg.apply(a);
         brandTick++;
         if (Cfg.b("brandOn", false) && brandTick % 5 == 1) Branding.walk(a);
     }

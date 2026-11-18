@@ -46,6 +46,7 @@ public class XEntry implements IXposedHookLoadPackage {
         // Application.attach, which LSPatch may run before we're loaded) so the
         // hooks are live before the gate ever fires.
         safe(new Runnable() { public void run() { Gate.install(lp.classLoader); } }, "gate");
+        safe(new Runnable() { public void run() { com.eightubah.mod.feat.RoomBg.install(lp.classLoader); } }, "roombg");
 
         // Install the audio chain hooks as early as possible (framework classes,
         // version-independent). Mic capture flows through WebRtcAudioRecord ->

@@ -75,7 +75,6 @@ public final class Monitor {
                     .setBufferSizeInBytes(Math.max(min, rate / 2))
                     .setTransferMode(AudioTrack.MODE_STREAM).build();
             t.play();
-            com.eightubah.mod.Diag.log("monitor track rate=%d", rate);
             return t;
         } catch (Throwable e) { XEntry.log("monitor build: %s", e); return null; }
     }

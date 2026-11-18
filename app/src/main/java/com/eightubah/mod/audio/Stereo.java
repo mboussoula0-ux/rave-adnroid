@@ -45,7 +45,7 @@ public final class Stereo {
     }
     public static void free() { buf = null; len = 0; pos = 0; on = false; }
 
-    public static void play() { pos = 0; diagFed = false; Monitor.resetRead(); on = true; if (mon) Monitor.ensureEngine(); }
+    public static void play() { pos = 0; Monitor.resetRead(); on = true; if (mon) Monitor.ensureEngine(); }
     public static void setMon(boolean v) {
         mon = v; Cfg.setB("stMon", v);
         if (v && on) { Monitor.resetRead(); Monitor.ensureEngine(); }
@@ -60,13 +60,10 @@ public final class Stereo {
     }
 
     /** linear-resampled playback into the mic buffer t[] (RYStFeed). */
-    private static boolean diagFed;
     static void feed(float[] t, int off, int c, double sr) {
         float[] b = buf; int L = len;
         if (b == null || L <= 1) { on = false; return; }
         double step = rate / (sr > 0 ? sr : rate);
-        if (!diagFed) { diagFed = true; com.eightubah.mod.Diag.log("stereo feed srcRate=%.0f micSr=%.0f step=%.4f vol=%.2f len=%d", rate, sr, step, vol, L);
-            com.eightubah.mod.Diag.toast("stereo src=" + (int) rate + " micSr=" + (int) sr + " step=" + String.format("%.3f", step)); }
         for (int i = 0; i < c; i++) {
             if (!on) { t[off + i] = 0f; continue; }
             long i0 = (long) pos;

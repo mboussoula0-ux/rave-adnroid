@@ -35,14 +35,8 @@ public final class AudioHooks {
     private static final ThreadLocal<float[]> TL = new ThreadLocal<>();
     private static float[] tl(int n) { float[] a = TL.get(); if (a == null || a.length < n) { a = new float[Math.max(n, 2048)]; TL.set(a); } return a; }
 
-    private static int diagN = 0;
-    private static long diagT0 = 0, diagFr = 0; private static boolean diagRate = false;
-
     public static void install() {
         MicSettings.load();
-        com.eightubah.mod.Diag.reset();
-        com.eightubah.mod.Diag.log("audio hooks installed");
-
         XC_MethodHook micHook = new XC_MethodHook() {
             // AudioRecord.read(bb,size) delegates to read(bb,size,mode); both are hooked,
             // so without this guard each physical read is processed TWICE (2x speed/noise).
@@ -91,17 +85,11 @@ public final class AudioHooks {
     private static void processMicBB(AudioRecord ar, ByteBuffer bb, int bytes) {
         int ch = Math.max(1, ar.getChannelCount()); double sr = ar.getSampleRate();
         int frames = (bytes / 2) / ch; if (frames <= 0) return;
-        if (diagN < 24) { diagN++; com.eightubah.mod.Diag.log("mic(bb) sr=%d ch=%d bytes=%d frames=%d fx=%b stereo=%b eq=%b micOn=%b echo=%.2f rev=%d",
-                (int) sr, ch, bytes, frames, Dsp.fxOn(), Stereo.isOn(), Dsp.gEqOn, Dsp.gMicOn, Dsp.gMicEcho, Dsp.gRevMic);
-            if (diagN == 1) com.eightubah.mod.Diag.toast("mic sr=" + (int) sr + " ch=" + ch + " frames=" + frames); }
         ByteBuffer d = bb.duplicate(); d.order(ByteOrder.LITTLE_ENDIAN); d.clear(); d.limit(bytes);
         ShortBuffer sb = d.asShortBuffer();
         float[] tmp = tl(frames);
         for (int f = 0; f < frames; f++) tmp[f] = sb.get(f * ch) / 32768f;
         Dsp.micFx(tmp, 0, frames, sr, micVs); AudioHooks.frames += frames;
-        if (diagT0 == 0) diagT0 = System.currentTimeMillis(); diagFr += frames;
-        if (!diagRate) { long el = System.currentTimeMillis() - diagT0; if (el >= 2500) { diagRate = true;
-            com.eightubah.mod.Diag.toast("mic throughput=" + (diagFr * 1000 / Math.max(1, el)) + "/s expect=" + (int) sr); } }
         for (int f = 0; f < frames; f++) {
             float v = tmp[f] * 32767f; short q = (short) (v > 32767f ? 32767 : v < -32768f ? -32768 : v);
             for (int c = 0; c < ch; c++) sb.put(f * ch + c, q);

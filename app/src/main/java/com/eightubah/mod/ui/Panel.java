@@ -351,9 +351,9 @@ public class Panel extends Dialog {
     }
     private String micStatus() {
         long fr = com.eightubah.mod.audio.AudioHooks.frames;
-        if (fr == 0) return L.t("لسا ما التقطت المايك. افتح المايك بالروم.", "No mic data yet. Unmute in a room.");
-        if (!Dsp.fxOn()) return L.t("المايك مرصود ✓، المغيّر مطفي.", "Mic detected ✓, changer off.");
-        return L.t("يشتغل ✓ إطارات: ", "Working ✓ frames: ") + fr;
+        if (fr == 0) return L.t("افتح المايك داخل الروم.", "Open your mic inside a room.");
+        if (!Dsp.fxOn()) return L.t("المايك جاهز ✓", "Mic ready ✓");
+        return L.t("يعمل ✓", "Working ✓");
     }
 
     // ---------------- Stereo ----------------
